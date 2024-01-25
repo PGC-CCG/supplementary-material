@@ -34,14 +34,14 @@ files <- c(
 # Loop to process each file
 for (file in files) {
   # Read the file
-  df <- read.delim(paste0("/Volumes/GoogleDrive/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Analisis_HT_nuevo_conocimiento/3.Desarrollo/Golden_standard/RIs_Evidences_Analysis_12.1/input/", file),
+  df <- read.delim(paste0("results/RIs_Evidences_Analysis_12.1/", file),
                    comment.char = "#", header = TRUE, sep = "\t", fill = TRUE)
-  
+
   # Clean white spaces
   df[] <- lapply(df, function(x) ifelse(x == "" | x == "?", "W", trimws(x)))
   df<- subset(df, !grepl("DksA", "X4.regulatorName"))
   # Save changes in new files
-  write.table(df, file = paste0("/Volumes/GoogleDrive/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Analisis_HT_nuevo_conocimiento/3.Desarrollo/Golden_standard/RIs_Evidences_Analysis_12.1/input/files_modified/", file), sep = "\t", quote = FALSE, row.names = FALSE)
+  write.table(df, file = paste0("results/RIs_Evidences_Analysis_12.1/modify/", file), sep = "\t", quote = FALSE, row.names = FALSE)
 }
 
 # Create a list to store the results of each file
@@ -50,7 +50,7 @@ results_list <- list()
 # Loop to process each file after changes
 for (file in files) {
   # Read the modified file
-  df <- read.delim(paste0("/Volumes/GoogleDrive/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Analisis_HT_nuevo_conocimiento/3.Desarrollo/Golden_standard/RIs_Evidences_Analysis_12.1/input/files_modified/", file),
+  df <- read.delim(paste0("results/RIs_Evidences_Analysis_12.1/modify/", file),
                    comment.char = "#", header = TRUE, sep = "\t", fill = TRUE)
   
   # Create a summary by confidence level
@@ -81,7 +81,7 @@ confLevelWithAll$condition <- str_replace_all(confLevelWithAll$condition, "With 
 confLevelWithAll <- confLevelWithAll %>% rename(`Confidence Level` = X20.confidenceLevel)
 
 # Create the bar chart
-write.table(confLevelWithAll, file = "/Volumes/GoogleDrive/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Analisis_HT_nuevo_conocimiento/3.Desarrollo/Golden_standard/RIs_Evidences_Analysis_12.1/Tables/Table_for_Figure4.txt", row.names = FALSE, col.names = TRUE, sep = "\t") 
+write.table(confLevelWithAll, file = "results/RIs_Evidences_Analysis_12.1/Table_for_Figure4.txt", row.names = FALSE, col.names = TRUE, sep = "\t") 
 #Plot the Figure 4
 Figures <- ggplot(confLevelWithAll, aes(x = factor(condition), y = n, fill = `Confidence Level`, colour = `Confidence Level`)) + 
   xlab("RIs set") +

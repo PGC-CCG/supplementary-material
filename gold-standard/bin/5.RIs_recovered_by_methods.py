@@ -8,7 +8,9 @@ AUTHOR
        Paloma Lara <palomalf86@gmail.com>
 
 DESCRIPTION
-       This program allows the analysis of RIs (the total set or a subset, for instance the classical or confirmed RIs) are recovered in the datasets from each HT TF-binding collection (ChIP-seq, ChIP-exo, DAP-seq and gSELEX). 
+       This program allows the analysis of RIs (the total set or a subset, 
+       for instance the classical or confirmed RIs) are recovered in the datasets 
+       from each HT TF-binding collection (ChIP-seq, ChIP-exo, DAP-seq and gSELEX). 
        
 CATEGORY
        Mapping programs
@@ -19,6 +21,8 @@ USAGE
 ARGUMENTS
 
 SOFTWARE REQUIREMENTS
+       python
+       libraries: pandas
 
 INPUT
      TF-RISet.txt download from https://regulondb.ccg.unam.mx/datasets, with or without a filter process 
@@ -51,7 +55,7 @@ results = {}
 # Process each input file
 for method in inputFiles:
     # Read TFs file into a DataFrame
-    dfTfs = pd.read_excel("/Volumes/GoogleDrive/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Curación_HT_pl/curation_datasets-HT/3.Desarrollo/DatasetsTFBSRegulonDB11.2/metodology_benchmarch/input/"+method+".xlsx")
+    dfTfs = pd.read_excel("./results/"+method+".xlsx")
 
     # Read "RIs_set.xlsx" file into a DataFrame, selecting columns of interest
     dfRis = pd.read_excel("/Volumes/GoogleDrive/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Curación_HT_pl/curation_datasets-HT/3.Desarrollo/DatasetsTFBSRegulonDB11.2/metodology_benchmarch/input/RIs_mapped.xlsx", usecols=["4)regulatorName", "21)tfrsEvidence", "Evidence;Reference"])

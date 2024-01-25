@@ -1,14 +1,14 @@
-#NAME: Regulatory Interaction anatomy analysis
+# NAME: Regulatory Interaction anatomy analysis
 
-#AUTHOR: Paloma Lara <palomalf86@gmail.com>
+# AUTHOR: Paloma Lara <palomalf86@gmail.com>
 
-#DESCRIPTION: 
-#This program allows the analysis of the RIs in terms of types, 
-#confidence level, categories, and evidence types supporting them.
+# DESCRIPTION: 
+# This program allows the analysis of the TF RIs in terms of types, 
+# confidence level, categories, and evidence types supporting them.
 
-#INPUT:TF-RISet.txt download from https://regulondb.ccg.unam.mx/datasets
+# INPUT: TF-RISet.txt download from https://regulondb.ccg.unam.mx/datasets
 
-##SOFTWARE REQUIREMENTS##
+## SOFTWARE REQUIREMENTS ##
 #install.packages("dplyr")
 #install.packages("stringr")
 #install.packages("UpSetR")
@@ -20,26 +20,34 @@ library(stringr)
 library(UpSetR)
 library(ggplot2)
 library(grid)
-#Create a dataframe from the RIs file
-df_RIs_set_01 = read.delim("/Volumes/GoogleDrive/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Analisis_HT_nuevo_conocimiento/3.Desarrollo/Golden_standard/RIs_Evidences_Analysis_12.1/input/TF-RISet_12.1.txt", comment.char="#", header = TRUE, sep = "\t", fill = TRUE)
+
+##########################################################################################
+## Reading and Preparing the data 
+##########################################################################################
+# Getting the data from the RIs file
+df_RIs_set_01 = read.delim("data-input/TF-RISet_12.1.txt", comment.char="#", header = TRUE, sep = "\t", fill = TRUE)
+
+# Filtering DksA RIs because it is not a TF.
 df_RIs_set <- df_RIs_set_01 %>% filter(X4.regulatorName != "DksA")
 View(df_RIs_set)
-#The RIs with confidence level unknown can be considered weak
+
+# The RIs with confidence level unknown can be considered weak
 df_RIs_set$"X20.confidenceLevel" <- str_replace_all(df_RIs_set$"X20.confidenceLevel", fixed("?"), "W")
 
-#Create a new column with all evidences for each RI
+# Joining the TFBS and RI evidences in one column
 df_RIs_set$"allEvidence" <- paste(df_RIs_set$X21.tfrsEvidence, df_RIs_set$X22.riEvidence, sep = ";")
 df_RIs_set$"allEvidence" <- sub(";$", "", df_RIs_set$"allEvidence")
 df_RIs_set$"allEvidence" <- sub("^;", "", df_RIs_set$"allEvidence")
 df_RIs_set$"allEvidence" <- sapply(strsplit(df_RIs_set$"allEvidence", ';'), function(i)paste(unique(i), collapse = ';'))
 df_RIs_set$"allEvidence" <- sapply(strsplit(df_RIs_set$"allEvidence", ';'), function(i)paste(sort(i), collapse = ';'))
 
-#Create a list with all evidences for all RIs
+# Create the Evidence catalog for RIs - Create a list with all evidences for all RIs
 indEvsAllRiAndSite<- df_RIs_set %>%
   select(allEvidence) %>%
   cSplit("allEvidence", sep=";", direction = "long") %>%
   count(allEvidence)
-#Create a new column with all evidences for each RI, but with similar binding-evidence types grouped
+
+# Create a new column with all evidences for each RI, but with similar binding-evidence types grouped
 df_RIs_set$"riEvGrouped" <- df_RIs_set$"allEvidence"
 df_RIs_set$"riEvGrouped" <- str_replace_all(df_RIs_set$"riEvGrouped", "EXP-IEP-GENE-EXPRESSION-ANALYSIS", "Expression")
 df_RIs_set$"riEvGrouped" <- str_replace_all(df_RIs_set$"riEvGrouped", "EXP-IEP-RNA-SEQ", "Expression")
@@ -88,14 +96,14 @@ df_RIs_set$"riEvGrouped" <- str_replace_all(df_RIs_set$"riEvGrouped", "EXP-IDA",
 df_RIs_set$"riEvGrouped" <- sapply(strsplit(df_RIs_set$"riEvGrouped", ';'), function(i)paste(unique(i), collapse = ';'))
 df_RIs_set$"riEvGrouped" <- sapply(strsplit(df_RIs_set$"riEvGrouped", ';'), function(i)paste(sort(i), collapse = ';'))
 
-##Create a new column with only binding evidence types grouped
+## Create a new column with only binding evidence types grouped
 df_RIs_set$"bindingEvGrouped"<- df_RIs_set$"riEvGrouped" 
 df_RIs_set$"bindingEvGrouped"<- str_replace_all(df_RIs_set$"bindingEvGrouped",fixed("Expression:W"),"-")
 df_RIs_set$"bindingEvGrouped" <- sapply(strsplit(df_RIs_set$"bindingEvGrouped", ';'), function(i)paste(unique(i), collapse = ';'))
 df_RIs_set$"bindingEvGrouped" <- sapply(strsplit(df_RIs_set$"bindingEvGrouped", ';'), function(i)paste(sort(i), collapse = ';'))
 df_RIs_set$"bindingEvGrouped"<- str_replace_all(df_RIs_set$"bindingEvGrouped", "-;","")
 
-#Create a new column with only binding categories
+# Create a new column with only binding categories
 df_RIs_set$"bindingEvCategory"<- df_RIs_set$"X25.riEvCategory"
 df_RIs_set$"bindingEvCategory"<- str_replace_all(df_RIs_set$"bindingEvCategory", fixed("|"), (","))
 df_RIs_set$"bindingEvCategory" <- sapply(strsplit(df_RIs_set$"bindingEvCategory", ','), function(i)paste(unique(i), collapse = ','))
@@ -126,7 +134,8 @@ df_RIs_set$"bindingCategorySummary"[df_RIs_set$"bindingEvCategory"=="Classicalbi
 
 
 #########################################################################################
-#Counts of confidence level for the three types of RIs for built the Table 1
+# Counts of confidence level for the three types of RIs for built the Table 1
+##########################################################################################
 
 #TF-promoter
 tfPromoterConfidenceLevel<- df_RIs_set %>%
@@ -150,14 +159,14 @@ tfGeneConfidenceLevel<- df_RIs_set %>%
   count(X20.confidenceLevel)
 tfGeneConfidenceLevel$riType<-"TF-gene"
 
-####Table1#### Ri types, grouped by confidence level
+
+#### Table 1: Ri types, grouped by confidence level
 riTypesAndConfidence<-rbind(tfPromoterConfidenceLevel,tfTuConfidenceLevel,tfGeneConfidenceLevel)
 riTypesAndConfidence<-riTypesAndConfidence %>% rename ("Confidence_level"=X20.confidenceLevel)
 riTypesAndConfidence<-riTypesAndConfidence[c("riType", "Confidence_level", "n")]
-write.table(riTypesAndConfidence, file = "/Volumes/GoogleDrive/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Analisis_HT_nuevo_conocimiento/3.Desarrollo/Golden_standard/RIs_Evidences_Analysis_12.1/Tables/RI_types&confidence-level_RDB12.1.v3.0.txt", append = FALSE, row.names = FALSE, col.names = TRUE, sep = "\t")
+write.table(riTypesAndConfidence, file = "results/RIs_Evidences_Analysis_12.1/RI_types&confidence-level_RDB12.1.v3.0.txt", append = FALSE, row.names = FALSE, col.names = TRUE, sep = "\t")
 
-############Barplot of RIs types and confidence level Figure 2A###########
-
+### Figure 2A: Barplot of RIs types and confidence level 
 Figure2A <- ggplot(riTypesAndConfidence, aes(x = factor(riType), y = n, fill = Confidence_level, colour = Confidence_level)) + 
   xlab("RI type") +
   geom_bar(position="stack", stat = "identity") +
@@ -177,8 +186,10 @@ Figure2A <- ggplot(riTypesAndConfidence, aes(x = factor(riType), y = n, fill = C
   labs(y = "Number of RIs")
 print(Figure2A)
 
+
 ################################################################################################
-#Get counts of category (HT or classical) for the three Ri types (Table S1), for built the Figure 2B
+# Get counts of category (HT or classical) for the three Ri types (Table S1), for built the Figure 2B
+#########################################################################################
 
 #TF-promoter
 tfPromoterthroughputType<- df_RIs_set %>%
@@ -187,14 +198,12 @@ tfPromoterthroughputType<- df_RIs_set %>%
   count(bindingCategorySummary)
 tfPromoterthroughputType$riType<-"TF-promoter"
 
-
 #TF-tu
 tfTuthroughputType<- df_RIs_set %>%
   filter(X2.riType=="tf-tu") %>%
   select(bindingCategorySummary) %>%
   count(bindingCategorySummary)
 tfTuthroughputType$riType<-"TF-TU"
-
 
 #TF-gene
 tfGenetfTuthroughputType<- df_RIs_set %>%
@@ -204,13 +213,14 @@ tfGenetfTuthroughputType<- df_RIs_set %>%
 tfGenetfTuthroughputType$riType<-"TF-gene"
 
 
-#Table with the counts of RI Types and confidence level
+### Table: Table with the counts of RI Types and confidence level
 riTypesAndThroughputType<-rbind(tfPromoterthroughputType,tfTuthroughputType,tfGenetfTuthroughputType)
 riTypesAndThroughputType<-riTypesAndThroughputType %>% rename ("Evidence_category"=bindingCategorySummary)
 #riTypesAndThroughputType$Evidence_category<- str_replace_all(riTypesAndThroughputType$Evidence_category,"none","not experimental")
 riTypesAndCategory<-riTypesAndThroughputType[c("riType", "Evidence_category", "n")]
-write.table(riTypesAndThroughputType, file = "/Volumes/GoogleDrive/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Analisis_HT_nuevo_conocimiento/3.Desarrollo/Golden_standard/RIs_Evidences_Analysis_12.1/Tables/riTypes&Category_RDB12.1_RIsv3.0.txt", append = FALSE, row.names = FALSE, col.names = TRUE, sep = "\t")
-#Plot the Figure 2B
+write.table(riTypesAndThroughputType, file = "results/RIs_Evidences_Analysis_12.1/riTypes&Category_RDB12.1_RIsv3.0.txt", append = FALSE, row.names = FALSE, col.names = TRUE, sep = "\t")
+
+### Figure 2B:
 Figure2B <- ggplot(riTypesAndThroughputType, aes(x = factor(riType), y = n, fill = Evidence_category, colour = Evidence_category)) + 
   xlab("RI type") +
   geom_bar(position="stack", stat = "identity") +
@@ -229,9 +239,11 @@ Figure2B <- ggplot(riTypesAndThroughputType, aes(x = factor(riType), y = n, fill
   ylim(0,4100)+
   labs(y = "Number of RIs")
 print(Figure2B)
-######################################################################################
+
+
 ############################################################################################
 #Get the counts of RIs with the different confidence levels and grouped by category for built Figure 4
+#########################################################################################
 
 #Classical
 througputCounts<-df_RIs_set %>%
@@ -265,10 +277,11 @@ throughputnoneConfidenceLevel$throughput<-"nonexperimental"
 throughputnoneConfidenceLevel<- throughputnoneConfidenceLevel %>%
   filter(X20.confidenceLevel!="")
 
-#Table with the counts of RIs with the different confidence levels and grouped by category
+# Table: able with the counts of RIs with the different confidence levels and grouped by category
 throughputTypesAndConfidence<-rbind(ClassicalConfidenceLevel,HTConfidenceLevel,HTClassicalConfidenceLevel,throughputnoneConfidenceLevel)
 throughputTypesAndConfidence<-throughputTypesAndConfidence %>% rename ("Confidence_level"=X20.confidenceLevel)
-#Plot the Figure 2C
+
+# Figure 2C: 
 Figure2C <- ggplot(throughputTypesAndConfidence, aes(x = factor(throughput), y = n, fill = Confidence_level, colour = Confidence_level)) + 
   xlab("Evidence category") +
   geom_bar(position="stack", stat = "identity") +
@@ -289,8 +302,7 @@ Figure2C <- ggplot(throughputTypesAndConfidence, aes(x = factor(throughput), y =
 print(Figure2C)
 
 
-##Plot the Figure2ABC
-
+## Figure 2 ABC: Plot
 # Make a vector of tags for the Figures
 etiquetas <- c("A", "B", "C")
 
@@ -307,12 +319,14 @@ combined_plot <- arrangeGrob(
   ncol = 1
 )
 
-
 # Save the combined graph
-ggsave("/Volumes/GoogleDrive/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Analisis_HT_nuevo_conocimiento/3.Desarrollo/Golden_standard/RIs_Evidences_Analysis_12.1/Figures_nov_2023/Figure2_A_B_C_RDB12.1_v3.0.png", combined_plot, width = 6, height = 8, units = "in", dpi = 300)
+ggsave("results/RIs_Evidences_Analysis_12.1/Figure2_A_B_C_RDB12.1_v3.0.png", combined_plot, width = 6, height = 8, units = "in", dpi = 300)
 
-############################################
+
+#########################################################################################
 # Built an Upset of binding evidence combinations found in all RIs
+#########################################################################################
+
 combinationsBindingEvRisAbundances<- df_RIs_set %>%
   select(bindingEvGrouped) %>%
   filter(bindingEvGrouped!="-") %>%
@@ -339,6 +353,7 @@ grid.text("Binding evidence supporting current RIs",x = 0.72, y=0.95, gp=gpar(fo
 
 ########################################################################3
 # Built an Upset of binding evidence combinations found in Confirmed RIs (Figure 3A)
+########################################################################3
 
 combinationsBindingEvConfirmedRisAbundances<- df_RIs_set %>%
   filter(X20.confidenceLevel=="C") %>%
@@ -365,8 +380,9 @@ upset(fromExpression(evCombinationConfirmedCounts),
       line.size = .3)
 grid.text("Binding evidence supporting confirmed RIs",x = 0.72, y=0.95, gp=gpar(fontsize=10))
 
-############################################
+########################################################################
 # Built an Upset of binding evidence combinations found in strong RIs (Figure 3B)
+########################################################################
 
 combinationsBindingEvStrongRisAbundances<- df_RIs_set %>%
   filter(X20.confidenceLevel=="S") %>%
@@ -395,7 +411,7 @@ grid.text("Binding evidence supporting strong RIs",x = 0.72, y=0.95, gp=gpar(fon
 
 ################################################################
 # Built an Upset of binding evidence combinations found in weak RIs (Figure 3C)
-
+########################################################################
 combinationsBindingEvWeakRisAbundances<- df_RIs_set %>%
   filter(X20.confidenceLevel=="W") %>%
   select(bindingEvGrouped) %>%
@@ -421,8 +437,9 @@ upset(fromExpression(evCombinationWeakCounts),
       line.size = .3)
 grid.text("Binding evidence supporting weak RIs",x = 0.72, y=0.95, gp=gpar(fontsize=10))
 
-
-##Additional analysis###############
+########################################################################
+##Additional analysis
+########################################################################
 
 #Counts of each type of RIs
 nrow(df_RIs_set[df_RIs_set$X2.riType=="tf-gene",])
@@ -438,11 +455,12 @@ nrow(df_RIs_set[df_RIs_set$X20.confidenceLevel=="W",])
 throughput_ri_abundances<- df_RIs_set %>%
   select(bindingCategorySummary) %>%
   count(bindingCategorySummary)
+
 #Counts of RIs with HT evidence (without classical evidence) and confidence level confirmed
 HTConfirmed<- df_RIs_set %>%
   filter(X20.confidenceLevel=="C") %>%
   filter(bindingCategorySummary=="HT") 
-#########################################################################################
+
 ##Save in a file the table with all RI evidence types grouped, where the expression evidence types are indicated only as Expression
 ind_evs_all_ri_abundances<- df_RIs_set %>%
   select(riEvGrouped) %>%
@@ -450,9 +468,10 @@ ind_evs_all_ri_abundances<- df_RIs_set %>%
   filter(riEvGrouped!="-") %>%
   count(riEvGrouped)
 ind_evs_all_ri_abund_ord <- ind_evs_all_ri_abundances[order(ind_evs_all_ri_abundances$n,  decreasing = TRUE), ]
-write.table(ind_evs_all_ri_abund_ord, file = "/Volumes/GoogleDrive/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Analisis_HT_nuevo_conocimiento/3.Desarrollo/Golden_standard/RIs_Evidences_Analysis_12.1/Tables/Evidences_from_all_RIs_12.1.v3.0.txt", append = FALSE, row.names = FALSE, col.names = TRUE, sep = "\t")
-#########################################################################################
-#calculate the abundance of esach binding category 
+write.table(ind_evs_all_ri_abund_ord, file = "results/RIs_Evidences_Analysis_12.1/Evidences_from_all_RIs_12.1.v3.0.txt", append = FALSE, row.names = FALSE, col.names = TRUE, sep = "\t")
+
+
+## Calculate the abundance of each binding category 
 category_ri_abundances<- df_RIs_set %>%
   select(X25.riEvCategory) %>%
   cSplit("X25.riEvCategory", sep="|", direction = "long") %>%
@@ -460,20 +479,18 @@ category_ri_abundances<- df_RIs_set %>%
   count(X25.riEvCategory)
 category_ri_abundances <- category_ri_abundances[order(category_ri_abundances$n,  decreasing = TRUE), ]
 
-##########################################################################################
-#########################################################################################
+
 #Get the subset of RIs with classical evidence for binding and confidence level weak
 classicalRisW<- df_RIs_set %>%
   filter(bindingCategorySummary=="Classical")%>%
   filter(X20.confidenceLevel=="W")
 
-##########################################################################################
 #Save in a file the table with all RI binding evidence types grouped
 select(bindingEvGrouped) %>%
   cSplit("bindingEvGrouped", sep=";", direction = "long") %>%
   filter(bindingEvGrouped!="-") %>%
   count(bindingEvGrouped)
 ind_binding_evs_all_ri_abundances <- ind_binding_evs_all_ri_abundances[order(ind_binding_evs_all_ri_abundances$n,  decreasing = TRUE), ]
-write.table(ind_binding_evs_all_ri_abundances, file = "/Volumes/GoogleDrive/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Analisis_HT_nuevo_conocimiento/3.Desarrollo/Golden_standard/RIs_Evidences_Analysis_12.1/Tables/RI_binding_ev_12.1.v3.0.txt", append = FALSE, row.names = FALSE, col.names = TRUE, sep = "\t")
+write.table(ind_binding_evs_all_ri_abundances, file = "results/RIs_Evidences_Analysis_12.1/RI_binding_ev_12.1.v3.0.txt", append = FALSE, row.names = FALSE, col.names = TRUE, sep = "\t")
 
   

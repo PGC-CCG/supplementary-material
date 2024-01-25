@@ -1,3 +1,44 @@
+'''
+NAME
+       Run_Coordinate-Updates.py
+
+VERSION
+       4.0
+
+AUTHOR
+       Cesar Bonavides
+
+DESCRIPTION
+    Updates the peaks genome positions of the datasets ht collections
+    using the new version of e. coli genome.
+
+CATEGORY
+    mapping
+
+USAGE
+     python Run_Coordinate-Updates.py
+
+ARGUMENTS
+    none
+
+SOFTWARE REQUERIMENTS
+    python 3.11
+
+INPUT
+
+    a) E. coli genome positions of the .2 and .3 genome version
+    b) RegulonDB datasets
+    c) HT datasets collections
+
+
+OUTPUT
+
+CREATION DATE
+     
+
+'''
+
+
 import pandas as pd
 import shutil, os
 import time
@@ -9,18 +50,17 @@ import traceback
 #print (os.getcwd())
 
 #Base path for scripts
-scripts_base_path="C:/Users/cbona/OneDrive/Documentos/GitHub/regulondb-data-pipelines/TU-match-maker/Cesar-Tests/Format-AuthorFiles_from_Metadata_and_CoordinatesUpdate-MOD202307"
+scripts_base_path="./bin"
 
 #Change directory to Scripts Directory
 os.chdir(scripts_base_path)
 
-
 #Base path for Input Files
-input_files_base_path="G:/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Curación_HT_pl/curation_datasets-HT/3.Desarrollo/DatasetsTFBSRegulonDB11.1"
+input_files_base_path="data-input/DatasetsTFBSRegulonDB11.1"
 print("\nInput Directory: \n" + input_files_base_path)
 
 #Base path for Output Files
-output_files_base_path="G:/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Curación_HT_pl/curation_datasets-HT/3.Desarrollo/DatasetsTFBSRegulonDB11.1"
+output_files_base_path="results/DatasetsTFBSRegulonDB11.1"
 print("\nOutput Directory: \n" + output_files_base_path + "\n")
 
 U000962_to_U000963_file = input_files_base_path + "/coordinate_updates" + "/U00096.2_to_U00096.3.tsv"
