@@ -1,6 +1,6 @@
-# TFRIs Architecture of Evidence Types
+# TF RIs Architecture of Evidence Types
 
-Scripts for *A Gold Standard for Transcription Factor Regulatory Interactions in Escherichia coli K-12: Architecture of Evidence Types*
+### *A Gold Standard for Transcription Factor Regulatory Interactions in Escherichia coli K-12: Architecture of Evidence Types*
 
 Here, we present a detailed  analysis of the sources of knowledge supporting the collection of transcriptional regulatory interactions (RIs) of *E. coli K-12*. An RI groups the transcription factor, its effect (positive or negative)  and the regulated  target, a promoter, a gene or transcription unit. 
 
@@ -12,13 +12,18 @@ This process enriched the evidence of close to one quarter of RIs in RegulonDB r
 
 #### requirements
 
-The analyses of the anatomy of RI knowledge presented here were performed using R (2022.06.23, version 4.2.1), Rstudio (2022.07.1, Build 554), and the ggplot2 (version 3.4.0) library.  
+The analyses of the anatomy of RI knowledge presented here were performed using 
+
+- R (2022.06.23, version 4.2.1), 
+- Rstudio (2022.07.1, Build 554), and the ggplot2 (version 3.4.0) library
+- Python release 3.11 
+
 
 
 All scripts and computational processes built to generate the data and analyses presented in this analysis are:
  
-Run_Coordinate-Updates.py
-1.RIs_mapping_To_HT-TF-binding-datasets.py2.New_HT-evidence_for_RIs.py3.RIs_anatomy_analysis.R4.RIs_confidence_level_analysis.R5.RIs_recovered_by_methods.py
+1. Run_Coordinate-Updates.py
+2. 1.RIs_mapping_To_HT-TF-binding-datasets.py3. 2.New_HT-evidence_for_RIs.py4. 3.RIs_anatomy_analysis.R5. 4.RIs_confidence_level_analysis.R6. 5.RIs_recovered_by_methods.py
 
 
 ### Mapping collection of TFBSs-HT to TFRSs from RegulonDB.
