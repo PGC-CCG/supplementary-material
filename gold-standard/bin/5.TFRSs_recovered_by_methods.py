@@ -28,11 +28,10 @@ INPUT
      TF-RISet.txt download from https://regulondb.ccg.unam.mx/datasets, with or without a filter process 
 
 OUTPUT
-   RIs_mapped_counts.xlsx, this file contains the total of RIs recovered by each methodology (ChIP-seq, ChIP-exo, DAP-seq and gSELEX)
-   DAP-SEQ_counts_by_TF.txt, this file contains the number of RIs recovered for each TF in the DAP-seq collection
-   GSELEX_counts_by_TF.txt, this file contains the number of RIs recovered for each TF in the gSELEX collection
-   CHIP-SEQ_counts_by_TF.txt, this file contains the number of RIs recovered for each TF in the ChIP-seq collection
-   CHIP-EXO_counts_by_TF.txt, this file contains the number of RIs recovered for each TF in the ChIP-exo collection
+   DAP-SEQ_sites_counts_by_TF.txt, this file contains the number of TFRSs recovered for each TF in the DAP-seq collection
+   GSELEX_sites_counts_by_TF.txt, this file contains the number of TFRSs recovered for each TF in the gSELEX collection
+   CHIP-SEQ_sites_counts_by_TF.txt, this file contains the number of TFRSs recovered for each TF in the ChIP-seq collection
+   CHIP-EXO_sites_counts_by_TF.txt, this file contains the number of TFRSs recovered for each TF in the ChIP-exo collection
      
 CREATION DATE
      30/07/2023
@@ -54,12 +53,12 @@ results = {}
 # Process each input file
 for method in input_files:
     # Read the TFs file into a DataFrame
-    df_tfs = pd.read_excel("/Volumes/GoogleDrive/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Curación_HT_pl/curation_datasets-HT/3.Desarrollo/DatasetsTFBSRegulonDB11.2/metodology_benchmarch/input/" + method + ".xlsx")
+    df_tfs = pd.read_excel("./input/" + method + ".xlsx")
 
     # Read the "RIs_set.xlsx" file into a DataFrame, selecting columns of interest
-    df_ris = pd.read_excel("/Volumes/GoogleDrive/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Curación_HT_pl/curation_datasets-HT/3.Desarrollo/DatasetsTFBSRegulonDB11.2/metodology_benchmarch/input/TF-RISet_12.1_CV_without_HT_mapped_paste_confirmed.xlsx")
+    df_ris = pd.read_excel("./input/TF-RISet_12.1_CV_without_HT_mapped_confirmed.xlsx")
     df_ris.fillna("", inplace=True)
-    output_file_counts_by_tf_path = "/Volumes/GoogleDrive/Shared drives/PGC-02.Proyectos_vigentes/Curacion/Curación_HT_pl/curation_datasets-HT/3.Desarrollo/DatasetsTFBSRegulonDB11.2/metodology_benchmarch/output/" + method + "Classical_Confirmed_sites_counts_by_TF_v2.txt"
+    output_file_counts_by_tf_path = "./output/" + method + "_sites_counts_by_TF.txt"
     output_file_counts_by_tf = open(output_file_counts_by_tf_path, "w")
     output_line0 = "TF" + "\t" + "Num_Sites_Classical" + "\t" + "Num_Sites_recovered" + "\t" + "Percent_Sites_Recovered_by_TF" + "\n"
     output_file_counts_by_tf.write(output_line0)
